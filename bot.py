@@ -18,7 +18,7 @@ def is_admin(ctx):
 
 @bot.slash_command(name='verify', description='Get payment information for a transaction ID')
 @commands.check(is_admin)
-async def kakunin(ctx, transaction_id: str):
+async def verify(ctx, transaction_id: discord.Option(str, "Enter Tebex transaction ID here")):
     url = f'https://plugin.tebex.io/payments/{transaction_id}'
     headers = {'X-Tebex-Secret': TEBEX_SECRET}
     response = requests.get(url, headers=headers)
@@ -54,8 +54,8 @@ async def products(ctx):
 
 @bot.slash_command(name='search', description='Look up player information')
 @commands.check(is_admin)
-async def search(ctx, username: str):
-    url = f'https://plugin.tebex.io/user/{username}'
+async def search(ctx, tebex-id: (str, "Enter Tebex username here")):
+    url = f'https://plugin.tebex.io/user/{tebex-id}'
     headers = {'X-Tebex-Secret': TEBEX_SECRET}
     response = requests.get(url, headers=headers)
 

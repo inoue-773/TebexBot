@@ -71,4 +71,44 @@ async def search(ctx, tebex-id: (str, "Enter Tebex username here")):
     else:
         await ctx.respond('Failed to retrieve player information.')
 
+@bot.slash_command(name='updateproduct', description='Update information of a package')
+@commands.check(is_admin)
+async def updateproduct(ctx, package_id: discord.Option(int, "Enter package ID here, check the ID by using /products beforehand."), enabled: discord.Option(bool, "Set this to be disabled if you want not to sell it"), name: discord.Option(str, "Name of the product"), price: discord.Option(float, "Price of the product")):
+    url = f'https://plugin.tebex.io/package/{package_id}'
+    headers = {'X-Tebex-Secret': TEBEX_SECRET}
+    data = {
+        'disabled': not enabled,
+        'name': name,
+        'price': price
+    }
+    response = requests.put(url, headers=headers, json=data)
+
+    if response.status_code == 204:
+        status = 'enabled' if enabled else 'disabled'
+        await ctx.respond(f'Package {package_id} has been updated. Status: {status}, Name: {name}, Price: {price}')
+    else:
+        await ctx.respond('Failed to update the package.')
+
+@bot.slash_command(name='createurl', description='Create a checkout URL for a package')
+@commands.check(is_admin)
+async def createurl(ctx, package_id: discord.Option(str, "Enter package ID here, check the ID by using /products beforehand."), tebex_id: discord.Option(str, "Enter Tebex ID here")):
+    url = 'https://plugin.tebex.io/checkout'
+    headers = {'X-Tebex-Secret': TEBEX_SECRET}
+    data = {
+        'package_id': package_id,
+        'username': tebex_id
+    }
+    response = requests.post(url, headers=headers, json=data)
+
+    if response.status_code == 201:
+        checkout_data = response.json()
+        checkout_url = checkout_data['url']
+        expires_at = checkout_data['expires']
+        embed = discord.Embed(title='Checkout URL Created', color=discord.Color.green())
+        embed.add_field(name='URL', value=checkout_url)
+        embed.add_field(name='Expires At', value=expires_at)
+        await ctx.respond(embed=embed)
+    else:
+        await ctx.respond('Failed to create the checkout URL.')
+
 bot.run(TOKEN)

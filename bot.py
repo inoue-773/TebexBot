@@ -40,7 +40,7 @@ async def kakunin(ctx, transaction_id: discord.Option(str, "tbxから始まるTr
 @commands.check(is_admin)
 async def products(ctx):
     url = 'https://plugin.tebex.io/packages'
-    headers = {'X-Tebex-Secret': TEBEX_SECRET}
+    headers = {'X_Tebex_Secret': TEBEX_SECRET}
     response = requests.get(url, headers=headers)
 
     if response.status_code == 200:
@@ -54,14 +54,14 @@ async def products(ctx):
 
 @bot.slash_command(name='search', description='Tebex IDから情報を取得')
 @commands.check(is_admin)
-async def search(ctx, tebex-id: discord.Option(str, "Tebex IDをここに入力 Transaction IDではない")):
-    url = f'https://plugin.tebex.io/user/{tebex-id}'
+async def search(ctx, tebex_id: discord.Option(str, "Tebex IDをここに入力 Transaction IDではない")):
+    url = f'https://plugin.tebex.io/user/{tebex_id}'
     headers = {'X-Tebex-Secret': TEBEX_SECRET}
     response = requests.get(url, headers=headers)
 
     if response.status_code == 200:
         data = response.json()
-        embed = discord.Embed(title=f'Player Information for {tebex-id}')
+        embed = discord.Embed(title=f'Player Information for {tebex_id}')
         embed.add_field(name='Username', value=data['player']['username'])
         embed.add_field(name='Ban Count', value=data['banCount'])
         embed.add_field(name='Chargeback Rate', value=data['chargebackRate'])

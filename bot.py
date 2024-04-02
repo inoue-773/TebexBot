@@ -43,14 +43,13 @@ async def products(ctx):
     headers = {'X_Tebex_Secret': TEBEX_SECRET}
     response = requests.get(url, headers=headers)
 
-    if response.status_code == 200:
+ 
         packages = response.json()
         embed = discord.Embed(title='Available Products')
         for package in packages:
             embed.add_field(name=package['name'], value=f"Price: {package['price']}", inline=False)
         await ctx.respond(embed=embed)
-    else:
-        await ctx.respond('Failed to retrieve product information.')
+
 
 @bot.slash_command(name='search', description='Tebex IDから情報を取得')
 @commands.check(is_admin)

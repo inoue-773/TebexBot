@@ -71,4 +71,44 @@ async def search(ctx, tebex-id: discord.Option(str, "Tebex IDをここに入力 
     else:
         await ctx.respond('Failed to retrieve player information.')
 
+@bot.slash_command(name='updateproduct', description='返礼品の情報を更新')
+@commands.check(is_admin)
+async def updateproduct(ctx, package_id: discord.Option(int, "返礼品IDを入力 分からない場合は/productsで確認"), enabled: discord.Option(bool, "disabledの場合寄付の受け付けを中止"), name: discord.Option(str, "新しい返礼品の名前"), price: discord.Option(float, "新しい返礼品の価格")):
+    url = f'https://plugin.tebex.io/package/{package_id}'
+    headers = {'X-Tebex-Secret': TEBEX_SECRET}
+    data = {
+        'disabled': not enabled,
+        'name': name,
+        'price': price
+    }
+    response = requests.put(url, headers=headers, json=data)
+
+    if response.status_code == 204:
+        status = 'enabled' if enabled else 'disabled'
+        await ctx.respond(f'Package {package_id} has been updated. Status: {status}, Name: {name}, Price: {price}')
+    else:
+        await ctx.respond('Failed to update the package.')
+
+@bot.slash_command(name='createurl', description='決済URLを作成')
+@commands.check(is_admin)
+async def createurl(ctx, package_id: discord.Option(str, "返礼品IDを入力 分からない場合は/productsで確認"), tebex_id: discord.Option(str, "Tebex IDを入力")):
+    url = 'https://plugin.tebex.io/checkout'
+    headers = {'X-Tebex-Secret': TEBEX_SECRET}
+    data = {
+        'package_id': package_id,
+        'username': tebex_id
+    }
+    response = requests.post(url, headers=headers, json=data)
+
+    if response.status_code == 201:
+        checkout_data = response.json()
+        checkout_url = checkout_data['url']
+        expires_at = checkout_data['expires']
+        embed = discord.Embed(title='Checkout URL Created', color=discord.Color.green())
+        embed.add_field(name='URL', value=checkout_url)
+        embed.add_field(name='Expires At', value=expires_at)
+        await ctx.respond(embed=embed)
+    else:
+        await ctx.respond('Failed to create the checkout URL.')
+
 bot.run(TOKEN)

@@ -16,9 +16,9 @@ bot = commands.Bot(command_prefix='/', intents=discord.Intents.all())
 def is_admin(ctx):
     return any(role.id in ADMIN_ROLE_IDS for role in ctx.author.roles)
 
-@bot.slash_command(name='verify', description='Get payment information for a transaction ID')
+@bot.slash_command(name='kakunin', description='Transaction IDから情報を取得')
 @commands.check(is_admin)
-async def kakunin(ctx, transaction_id: str):
+async def kakunin(ctx, transaction_id: discord.Option(str, "tbxから始まるTransaction IDを入力")):
     url = f'https://plugin.tebex.io/payments/{transaction_id}'
     headers = {'X-Tebex-Secret': TEBEX_SECRET}
     response = requests.get(url, headers=headers)
@@ -36,7 +36,7 @@ async def kakunin(ctx, transaction_id: str):
     else:
         await ctx.respond('Failed to retrieve payment information.')
 
-@bot.slash_command(name='products', description='List all available products on the store')
+@bot.slash_command(name='products', description='寄付できる返礼品の一覧')
 @commands.check(is_admin)
 async def products(ctx):
     url = 'https://plugin.tebex.io/packages'
@@ -52,16 +52,16 @@ async def products(ctx):
     else:
         await ctx.respond('Failed to retrieve product information.')
 
-@bot.slash_command(name='search', description='Look up player information')
+@bot.slash_command(name='search', description='Tebex IDから情報を取得')
 @commands.check(is_admin)
-async def search(ctx, username: str):
-    url = f'https://plugin.tebex.io/user/{username}'
+async def search(ctx, tebex-id: discord.Option(str, "Tebex IDをここに入力 Transaction IDではない")):
+    url = f'https://plugin.tebex.io/user/{tebex-id}'
     headers = {'X-Tebex-Secret': TEBEX_SECRET}
     response = requests.get(url, headers=headers)
 
     if response.status_code == 200:
         data = response.json()
-        embed = discord.Embed(title=f'Player Information for {username}')
+        embed = discord.Embed(title=f'Player Information for {tebex-id}')
         embed.add_field(name='Username', value=data['player']['username'])
         embed.add_field(name='Ban Count', value=data['banCount'])
         embed.add_field(name='Chargeback Rate', value=data['chargebackRate'])

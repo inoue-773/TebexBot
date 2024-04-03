@@ -25,43 +25,45 @@ async def kakunin(ctx, transaction_id: discord.Option(str, "tbxから始まるTr
     response = requests.get(url, headers=key)
 
     if response.status_code == 200:
-    data = response.json()
+        data = response.json()
 
-    # Convert the date to JST
-    date_str = data['date']
-    date_utc = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S%z")
-    date_jst = date_utc + timedelta(hours=9)
-    date_jst_str = date_jst.strftime("%Y-%m-%d %H:%M:%S")
+        # Convert the date to JST
+        date_str = data['date']
+        date_utc = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S%z")
+        date_jst = date_utc + timedelta(hours=9)
+        date_jst_str = date_jst.strftime("%Y-%m-%d %H:%M:%S")
 
-    embed = discord.Embed(
-        title=f"🔍 Information for {transaction_id}",
-        description="Here are the details of the transaction:",
-        color=discord.Color.blue()
-    )
+        embed = discord.Embed(
+            title=f"🔍 Information for {transaction_id}",
+            description="Here are the details of the transaction:",
+            color=discord.Color.blue()
+        )
 
-    embed.add_field(name="💰 Amount", value=data['amount'], inline=True)
-    
-    status = data['status']
-    if status.lower() == 'complete':
-        status_text = f"```🟢 {status}```"
-    else:
-        status_text = f"```🔴 {status}```"
-    embed.add_field(name="📊 Status", value=status_text, inline=True)
-    
-    embed.add_field(name="📅 Date (JST)", value=date_jst_str, inline=True)
-    
-    player_name = data['player']['name']
-    embed.add_field(name="👤 Player Name", value=player_name, inline=False)
-    
-    package_names = ', '.join([package['name'] for package in data['packages']])
-    embed.add_field(name="🎁 Package Name(s)", value=package_names, inline=False)
-    
-    embed.set_thumbnail(url="https://i.imgur.com/your_image_url.png")
-    
-    embed.set_footer(
-        text="Powered By NickyBoy",
-        icon_url="https://i.imgur.com/QfmDKS6.png"
-    )
+        embed.add_field(name="💰 Amount", value=data['amount'], inline=True)
+
+        status = data['status']
+        if status.lower() == 'complete':
+            status_text = f"```🟢 {status}```"
+        else:
+            status_text = f"```🔴 {status}```"
+        embed.add_field(name="📊 Status", value=status_text, inline=True)
+
+        embed.add_field(name="📅 Date (JST)", value=date_jst_str, inline=True)
+
+        player_name = data['player']['name']
+        embed.add_field(name="👤 Player Name", value=player_name, inline=False)
+
+        package_names = ', '.join([package['name'] for package in data['packages']])
+        embed.add_field(name="🎁 Package Name(s)", value=package_names, inline=False)
+
+        embed.set_thumbnail(url="https://i.imgur.com/your_image_url.png")
+
+        embed.set_footer(
+            text="Powered By NickyBoy",
+            icon_url="https://i.imgur.com/QfmDKS6.png"
+        )
+
+        await ctx.respond(embed=embed)
     else:
         await ctx.respond('Failed to retrieve payment information.')
 

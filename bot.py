@@ -4,7 +4,7 @@ import requests
 from discord.ext import commands
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
-from reservations import createhouse, addresidents, vipapartment, load_apartments
+from reservations import setup, load_apartments
 
 
 load_dotenv()
@@ -163,6 +163,9 @@ async def _addresidents(ctx, name: str, num_residents: int):
 @bot.slash_command(name='vipapartment', description='Show a list of apartments')
 async def _vipapartment(ctx):
     await vipapartment(ctx)
+
+# Set up the reservations commands
+setup(bot)
 
 # Load the apartments data when the bot starts
 load_apartments()

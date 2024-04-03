@@ -1,6 +1,7 @@
 import discord
 import json
 from discord.ext import commands
+from bot import is_admin
 
 # Create a dictionary to store apartment data
 apartments = {}

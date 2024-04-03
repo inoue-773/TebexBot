@@ -39,7 +39,7 @@ async def kakunin(ctx, transaction_id: discord.Option(str, "tbxから始まるTr
             color=discord.Color.blue()
         )
 
-        embed.add_field(name="💰 Amount", value=data['amount'], inline=True)
+        embed.add_field(name="💰 Price", value=data['amount'], inline=True)
 
         status = data['status']
         if status.lower() == 'complete':
@@ -48,15 +48,13 @@ async def kakunin(ctx, transaction_id: discord.Option(str, "tbxから始まるTr
             status_text = f"```🔴 {status}```"
         embed.add_field(name="📊 Status", value=status_text, inline=True)
 
-        embed.add_field(name="📅 Date (JST)", value=date_jst_str, inline=True)
+        embed.add_field(name="📅 Date (JST)", value=date_jst_str)
 
         player_name = data['player']['name']
-        embed.add_field(name="👤 Player Name", value=player_name, inline=False)
+        embed.add_field(name="👤 Tebex Username", value=player_name, inline=False)
 
         package_names = ', '.join([package['name'] for package in data['packages']])
         embed.add_field(name="🎁 Package Name(s)", value=package_names, inline=False)
-
-        embed.set_thumbnail(url="https://i.imgur.com/your_image_url.png")
 
         embed.set_footer(
             text="Powered By NickyBoy",

@@ -40,15 +40,21 @@ async def kakunin(ctx, transaction_id: discord.Option(str, "tbxから始まるTr
 @commands.check(is_admin)
 async def products(ctx):
     url = 'https://plugin.tebex.io/packages'
-    headers = {'X_Tebex_Secret': TEBEX_SECRET}
-    response = requests.get(url, headers=headers)
+    key = {'X-Tebex-Secret': TEBEX_SECRET}
+    response = requests.get(url, headers=key)
 
- 
+    if response.status_code == 200:
         packages = response.json()
         embed = discord.Embed(title='Available Products')
         for package in packages:
-            embed.add_field(name=package['name'], value=f"Price: {package['price']}", inline=False)
+            package_name = package['name']
+            package_price = package['price']
+            package_category = package['category']['name']
+            package_info = f"Price: {package_price}, Category: {package_category}"
+            embed.add_field(name=package_name, value=package_info, inline=False)
         await ctx.respond(embed=embed)
+    else:
+        await ctx.respond('Failed to retrieve product information.')
 
 
 @bot.slash_command(name='search', description='Tebex IDから情報を取得')

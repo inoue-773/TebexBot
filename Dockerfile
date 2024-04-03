@@ -13,4 +13,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Run the bot
-CMD ["python", "bot.py"]
+CMD ["python", "bot.py", "reservations.py"]

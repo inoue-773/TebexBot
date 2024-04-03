@@ -24,7 +24,7 @@ async def kakunin(ctx, transaction_id: discord.Option(str, "tbxから始まるTr
     key = {'X-Tebex-Secret': TEBEX_SECRET}
     response = requests.get(url, headers=key)
 
-     if response.status_code == 200:
+    if response.status_code == 200:
     data = response.json()
 
     # Convert the date to JST
@@ -74,7 +74,7 @@ async def products(ctx):
 
     if response.status_code == 200:
         packages = response.json()
-        embed = discord.Embed(title='# 返礼品一覧', color=0XE16941, description='返礼品の一覧' )
+        embed = discord.Embed(title='返礼品一覧', color=0XE16941, description='返礼品の一覧' )
         for package in packages:
             package_name = package['name']
             package_price = package['price']

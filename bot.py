@@ -4,6 +4,7 @@ import requests
 from discord.ext import commands
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
+from reservations import createhouse, addresidents, vipapartment, load_apartments
 
 
 load_dotenv()
@@ -148,5 +149,22 @@ async def createurl(ctx, package_id: discord.Option(str, "返礼品IDを入力 �
         await ctx.respond(embed=embed)
     else:
         await ctx.respond('Failed to create the checkout URL.')
+
+@bot.slash_command(name='createhouse', description='Create a new apartment')
+@commands.check(is_admin)
+async def _createhouse(ctx, name: str, max_residents: int):
+    await createhouse(ctx, name, max_residents)
+
+@bot.slash_command(name='addresidents', description='Add new residents to an apartment')
+@commands.check(is_admin)
+async def _addresidents(ctx, name: str, num_residents: int):
+    await addresidents(ctx, name, num_residents)
+
+@bot.slash_command(name='vipapartment', description='Show a list of apartments')
+async def _vipapartment(ctx):
+    await vipapartment(ctx)
+
+# Load the apartments data when the bot starts
+load_apartments()
 
 bot.run(TOKEN)

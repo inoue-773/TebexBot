@@ -299,8 +299,8 @@ async def deletehouse(ctx, name: str):
 # ping system
 @bot.slash_command(name='server', description='Check the status of the server')
 async def server(ctx):
-    ip_address = SERVER_IP
-    port = 30110  # Specify the port number 
+    ip_address = '162.222.17.5'
+    port = 80  # Specify the port number you want to check (e.g., 80 for HTTP)
 
     try:
         # Create a socket object
@@ -311,14 +311,14 @@ async def server(ctx):
         result = sock.connect_ex((ip_address, port))
 
         if result == 0:
-            status = '🟢 オンライン'
+            status = '🟢 Online'
             color = discord.Color.green()
         else:
-            status = '🔴 オフライン'
+            status = '🔴 Offline'
             color = discord.Color.red()
 
     except socket.error:
-        status = '🔴 オフライン'
+        status = '🔴 Offline'
         color = discord.Color.red()
 
     finally:
@@ -328,12 +328,14 @@ async def server(ctx):
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     embed = discord.Embed(title='Server Status', color=color)
-    embed.add_field(name='🔌サーバー状態', value=status, inline=False)
-    embed.add_field(name='🕒時刻', value=current_time, inline=False)
-    embed.set_thumbnail(url="https://i.imgur.com/sK2BAAO.png")
-    embed.set_footer(text="Powered By NickyBoy", icon_url="https://i.imgur.com/QfmDKS6.png")
+    embed.add_field(name='Status', value=status, inline=False)
+    embed.add_field(name='Time', value=current_time, inline=False)
 
-    await ctx.respond(embed=embed)
+    try:
+        await ctx.respond(embed=embed)
+    except Exception as e:
+        print(f"Error sending response: {str(e)}")
+        await ctx.respond("An error occurred while sending the response. Please try again later.")
 
 # Load the apartments data when the bot starts
 load_apartments()

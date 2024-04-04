@@ -4,7 +4,7 @@ import requests
 import json
 from discord.ext import commands
 from dotenv import load_dotenv
-from pythonping import ping
+import socket
 from datetime import datetime, timedelta
 
 load_dotenv()
@@ -184,12 +184,12 @@ async def recentpayments(ctx):
         embed = discord.Embed(title='Recent Payments', color=discord.Color.blue())
 
         for payment in payments:
-            transaction_id = payment['txn_id']
-            timestamp = payment['time']
-            amount = payment['price']
-            currency = payment['currency']
-            status = payment['status']
-            player_name = payment['player']['name']
+            transaction_id = payment.get('txn_id', 'N/A')  # Use 'N/A' as default if 'txn_id' is not found
+            timestamp = payment.get('time', 0)  # Use 0 as default if 'time' is not found
+            amount = payment.get('price', 'N/A')  # Use 'N/A' as default if 'price' is not found
+            currency = payment.get('currency', 'N/A')  # Use 'N/A' as default if 'currency' is not found
+            status = payment.get('status', 'N/A')  # Use 'N/A' as default if 'status' is not found
+            player_name = payment.get('player', {}).get('name', 'N/A')  # Use 'N/A' as default if 'player' or 'name' is not found
 
             # Convert the Unix timestamp to a datetime object
             dt = datetime.fromtimestamp(timestamp)
@@ -200,7 +200,7 @@ async def recentpayments(ctx):
             # Format the datetime as a string in JST
             jst_time = jst_dt.strftime("%Y-%m-%d %H:%M:%S")
 
-            package_names = ', '.join([package['name'] for package in payment['packages']])
+            package_names = ', '.join([package.get('name', 'N/A') for package in payment.get('packages', [])])  # Use 'N/A' as default if 'packages' or 'name' is not found
 
             payment_info = f"Player: {player_name}\nAmount: {amount} {currency}\nPackage(s): {package_names}\nStatus: {status}\nDate (JST): {jst_time}"
             embed.add_field(name=f"Transaction ID: {transaction_id}", value=payment_info, inline=False)
@@ -297,23 +297,39 @@ async def deletehouse(ctx, name: str):
 
 
 # ping system
-@bot.slash_command(name='server', description='サーバーの状態を確認します')
+@bot.slash_command(name='server', description='Check the status of the server')
 async def server(ctx):
     ip_address = SERVER_IP
-    response_list = ping(ip_address, size=40, count=10)
+    port = 30110  # Specify the port number 
 
-    if response_list.rtt_avg_ms > 0:
-        status = '```🟢 オンライン```'
-        color = discord.Color.green()
-    else:
-        status = '```🔴 オフライン```'
+    try:
+        # Create a socket object
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(5)  # Set a timeout of 5 seconds
+
+        # Connect to the server
+        result = sock.connect_ex((ip_address, port))
+
+        if result == 0:
+            status = '🟢 オンライン'
+            color = discord.Color.green()
+        else:
+            status = '🔴 オフライン'
+            color = discord.Color.red()
+
+    except socket.error:
+        status = '🔴 オフライン'
         color = discord.Color.red()
+
+    finally:
+        # Close the socket
+        sock.close()
 
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     embed = discord.Embed(title='Server Status', color=color)
     embed.add_field(name='🔌サーバー状態', value=status, inline=False)
-    embed.add_field(name='🕒Time', value=current_time, inline=False)
+    embed.add_field(name='🕒時刻', value=current_time, inline=False)
     embed.set_thumbnail(url="https://i.imgur.com/sK2BAAO.png")
     embed.set_footer(text="Powered By NickyBoy", icon_url="https://i.imgur.com/QfmDKS6.png")
 

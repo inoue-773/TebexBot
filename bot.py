@@ -100,7 +100,7 @@ async def products(ctx):
             package_id = package['id']
             package_info = f"Price: {package_price}, ID: {package_id}, Category: {package_category}"
             embed.add_field(name=package_name, value=package_info, inline=False)
-            embed.add_field(name=\u200b, value=\u200b, inline=False)
+            embed.add_field(name=r'\u200b', value=r'\u200b', inline=False)
             embed.set_footer(text="Powered By NickyBoy", icon_url="https://i.imgur.com/QfmDKS6.png")
         await ctx.respond(embed=embed)
     else:

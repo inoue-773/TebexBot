@@ -216,7 +216,7 @@ async def recentpayments(ctx):
 
 @bot.slash_command(name='createhouse', description='新規VIPハウスを作成')
 @commands.check(is_admin)
-async def createhouse(ctx, name: discord.Option(str, "VIPハウスの名前"), max_residents: (int, "入居できる人数の最大値")):
+async def createhouse(ctx, name: discord.Option(str, "VIPハウスの名前"), max_residents: discord.Option(int, "入居できる人数の最大値")):
     if name in apartments:
         await ctx.respond(f"すでに '{name}' は存在します。同じカテゴリで複数のVIPハウスを作る場合、高級VIPハウス(1000番)、高級VIPハウス(2000番)などと番地を入れて名前の被りを回避してください。", ephemeral=True)
     else:

@@ -95,17 +95,32 @@ async def products(ctx):
 
     if response.status_code == 200:
         packages = response.json()
-        embed = discord.Embed(title='返礼品一覧', color=0XE16941, description='返礼品の一覧')
-        for package in packages:
+        embeds = []
+        current_embed = None
+
+        for index, package in enumerate(packages, start=1):
+            if index % 25 == 1:
+                if current_embed:
+                    embeds.append(current_embed)
+                current_embed = discord.Embed(title='返礼品一覧', color=0XE16941, description='返礼品の一覧')
+
             package_name = package['name']
             package_price = package['price']
             package_category = package['category']['name']
             package_id = package['id']
             package_info = f"Price: {package_price}, ID: {package_id}, Category: {package_category}"
-            embed.add_field(name=package_name, value=package_info, inline=False)
-            embed.add_field(name=r'\u200b', value=r'\u200b', inline=False)
-            embed.set_footer(text="Powered By NickyBoy", icon_url="https://i.imgur.com/QfmDKS6.png")
-        await ctx.respond(embed=embed)
+            current_embed.add_field(name=package_name, value=package_info, inline=False)
+            current_embed.add_field(name=r'\u200b', value=r'\u200b', inline=False)
+            current_embed.set_footer(text="Powered By NickyBoy", icon_url="https://i.imgur.com/QfmDKS6.png")
+
+        if current_embed:
+            embeds.append(current_embed)
+
+        if embeds:
+            for embed in embeds:
+                await ctx.send(embed=embed)
+        else:
+            await ctx.respond('No products found.')
     else:
         await ctx.respond('Failed to retrieve product information.')
 

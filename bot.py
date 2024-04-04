@@ -12,7 +12,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 TEBEX_SECRET = os.getenv('TEBEX_SECRET')
 ADMIN_ROLE_IDS = [int(role_id) for role_id in os.getenv('ADMIN_ROLE_IDS').split(',')]
 
-intents = discord.Intents.default()
+intents = discord.Intents.all()
 intents.members = True
 bot = commands.Bot(command_prefix='/', intents=intents)
 
@@ -66,7 +66,7 @@ async def kakunin(ctx, transaction_id: discord.Option(str, "tbxから始まるTr
             status_text = f"```🔴 {status}```"
         embed.add_field(name="📊 Status", value=status_text, inline=True)
 
-        embed.add_field(name="📅 Date (JST)", value=date_jst_str)
+        embed.add_field(name="📅 Date (JST)", value=date_jst_str, inline=False)
 
         player_name = data['player']['name']
         embed.add_field(name="👤 Tebex Username", value=player_name, inline=False)
@@ -100,6 +100,7 @@ async def products(ctx):
             package_id = package['id']
             package_info = f"Price: {package_price}, ID: {package_id}, Category: {package_category}"
             embed.add_field(name=package_name, value=package_info, inline=False)
+            embed.add_field(name=\u200b, value=\u200b, inline=False)
             embed.set_footer(text="Powered By NickyBoy", icon_url="https://i.imgur.com/QfmDKS6.png")
         await ctx.respond(embed=embed)
     else:
@@ -166,6 +167,50 @@ async def createurl(ctx, package_id: discord.Option(str, "返礼品IDを入力 �
     else:
         await ctx.respond('Failed to create the checkout URL.')
 
+@bot.slash_command(name='recentpayments', description='直近25件の決済の一覧表示')
+@commands.check(is_admin)
+async def recentpayments(ctx):
+    url = 'https://plugin.tebex.io/payments?paged=1'
+    key = {'X-Tebex-Secret': TEBEX_SECRET}
+    response = requests.get(url, headers=key)
+
+    if response.status_code == 200:
+        data = response.json()
+        payments = data['data']
+
+        embed = discord.Embed(title='Recent Payments', color=discord.Color.blue())
+
+        for payment in payments:
+            transaction_id = payment['txn_id']
+            timestamp = payment['time']
+            amount = payment['price']
+            currency = payment['currency']
+            status = payment['status']
+            player_name = payment['player']['name']
+
+            # Convert the Unix timestamp to a datetime object
+            dt = datetime.fromtimestamp(timestamp)
+
+            # Add 9 hours to convert from UTC to JST
+            jst_dt = dt + timedelta(hours=9)
+
+            # Format the datetime as a string in JST
+            jst_time = jst_dt.strftime("%Y-%m-%d %H:%M:%S")
+
+            package_names = ', '.join([package['name'] for package in payment['packages']])
+
+            payment_info = f"Player: {player_name}\nAmount: {amount} {currency}\nPackage(s): {package_names}\nStatus: {status}\nDate (JST): {jst_time}"
+            embed.add_field(name=f"Transaction ID: {transaction_id}", value=payment_info, inline=False)
+
+        embed.set_footer(text="Powered By NickyBoy", icon_url="https://i.imgur.com/QfmDKS6.png")
+        await ctx.respond(embed=embed)
+    else:
+        await ctx.respond('Failed to retrieve recent payments.')
+
+
+
+# apartment management
+
 @bot.slash_command(name='createhouse', description='Create a new apartment')
 @commands.check(is_admin)
 async def createhouse(ctx, name: str, max_residents: int):
@@ -198,20 +243,20 @@ async def addresidents(ctx, name: str, num_residents: int):
             save_apartments()
             await ctx.respond(f"{available_slots} resident(s) added to apartment '{name}'. {num_residents - available_slots} resident(s) added to the waiting list.")
 
-@bot.slash_command(name='vipapartment', description='Show a list of apartments')
+@bot.slash_command(name='vipapartment', description='VIPハウスの入居状況を表示')
 @commands.check(is_admin)
 async def vipapartment(ctx):
     if not apartments:
-        await ctx.respond("No apartments found.")
+        await ctx.respond("VIPハウスが登録されていません")
     else:
-        embed = discord.Embed(title='VIP Apartments', color=discord.Color.blue())
+        embed = discord.Embed(title='VIP Apartments', color=discord.Color.yellow())
         for name, apartment in apartments.items():
             embed.add_field(
                 name=name,
-                value=f"Max Residents: {apartment['max_residents']}\nCurrent Residents: {apartment['current_residents']}\nWaiting List: {apartment['waiting_list']}",
+                value=f"最大入居可能人数: {apartment['max_residents']}\n現在の入居数: {apartment['current_residents']}\nキャンセル待ち: {apartment['waiting_list']}",
                 inline=False
             )
-        await ctx.respond(embed=embed)
+        await ctx.respond(embed=embed, ephemeral=True)
 
 # Load the apartments data when the bot starts
 load_apartments()

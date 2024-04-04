@@ -4,6 +4,7 @@ import requests
 import json
 from discord.ext import commands
 from dotenv import load_dotenv
+from pythonping import ping
 from datetime import datetime, timedelta
 
 load_dotenv()
@@ -11,6 +12,8 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 TEBEX_SECRET = os.getenv('TEBEX_SECRET')
 ADMIN_ROLE_IDS = [int(role_id) for role_id in os.getenv('ADMIN_ROLE_IDS').split(',')]
+SERVER_IP = os.getenv('LIVE_SERVER_IP')
+
 
 intents = discord.Intents.all()
 intents.members = True
@@ -211,11 +214,11 @@ async def recentpayments(ctx):
 
 # apartment management
 
-@bot.slash_command(name='createhouse', description='Create a new apartment')
+@bot.slash_command(name='createhouse', description='新規VIPハウスを作成')
 @commands.check(is_admin)
-async def createhouse(ctx, name: str, max_residents: int):
+async def createhouse(ctx, name: discord.Option(str, "VIPハウスの名前"), max_residents: (int, "入居できる人数の最大値")):
     if name in apartments:
-        await ctx.respond(f"An apartment with the name '{name}' already exists.")
+        await ctx.respond(f"すでに '{name}' は存在します。同じカテゴリで複数のVIPハウスを作る場合、高級VIPハウス(1000番)、高級VIPハウス(2000番)などと番地を入れて名前の被りを回避してください。", ephemeral=True)
     else:
         apartments[name] = {
             'max_residents': max_residents,
@@ -223,40 +226,98 @@ async def createhouse(ctx, name: str, max_residents: int):
             'waiting_list': 0
         }
         save_apartments()
-        await ctx.respond(f"Apartment '{name}' created successfully.")
+        await ctx.respond(f"Apartment '{name}' created successfully.", ephemeral=True)
 
 @bot.slash_command(name='addresidents', description='Add new residents to an apartment')
 @commands.check(is_admin)
 async def addresidents(ctx, name: str, num_residents: int):
     if name not in apartments:
-        await ctx.respond(f"Apartment '{name}' does not exist.")
+        await ctx.respond(f"Apartment '{name}' は存在しません", ephemeral=True)
     else:
         apartment = apartments[name]
         available_slots = apartment['max_residents'] - apartment['current_residents']
         if num_residents <= available_slots:
             apartment['current_residents'] += num_residents
             save_apartments()
-            await ctx.respond(f"{num_residents} resident(s) added to apartment '{name}'.")
+            await ctx.respond(f"{num_residents} resident(s) added to apartment '{name}'.", ephemeral=True)
         else:
             apartment['current_residents'] = apartment['max_residents']
             apartment['waiting_list'] += num_residents - available_slots
             save_apartments()
-            await ctx.respond(f"{available_slots} resident(s) added to apartment '{name}'. {num_residents - available_slots} resident(s) added to the waiting list.")
+            await ctx.respond(f"{available_slots} resident(s) added to apartment '{name}'. {num_residents - available_slots} resident(s) added to the waiting list.", ephemeral=True)
 
 @bot.slash_command(name='vipapartment', description='VIPハウスの入居状況を表示')
-@commands.check(is_admin)
 async def vipapartment(ctx):
     if not apartments:
         await ctx.respond("VIPハウスが登録されていません")
     else:
-        embed = discord.Embed(title='VIP Apartments', color=discord.Color.yellow())
+        embed = discord.Embed(title='VIP Apartments', description='現在のVIPハウスの状況 超高級VIPはチケットにて随時受付中', color=discord.Color.yellow())
         for name, apartment in apartments.items():
             embed.add_field(
-                name=name,
+                name=f"🏠 {name}",
                 value=f"最大入居可能人数: {apartment['max_residents']}\n現在の入居数: {apartment['current_residents']}\nキャンセル待ち: {apartment['waiting_list']}",
                 inline=False
             )
+            embed.set_thumbnail(url="https://i.imgur.com/sK2BAAO.png")
+            embed.set_footer(text="Powered By NickyBoy", icon_url="https://i.imgur.com/QfmDKS6.png")
         await ctx.respond(embed=embed, ephemeral=True)
+
+@bot.slash_command(name='updateresidents', description='VIPハウスの人数を更新')
+@commands.check(is_admin)
+async def updateresidents(ctx, name: discord.Option(str, "VIPハウスの名前"), updated_residents: (int, "現在の入居数+キャンセル待ちの数")):
+    if name not in apartments:
+        await ctx.respond(f"Apartment '{name}' does not exist.")
+    else:
+        apartment = apartments[name]
+        current_residents = apartment['current_residents']
+        waiting_list = apartment['waiting_list']
+
+        if updated_residents < current_residents:
+            difference = current_residents - updated_residents
+            if difference <= waiting_list:
+                apartment['waiting_list'] -= difference
+            else:
+                apartment['waiting_list'] = 0
+                apartment['current_residents'] = updated_residents
+        else:
+            apartment['current_residents'] = min(updated_residents, apartment['max_residents'])
+
+        save_apartments()
+        await ctx.respond(f" '{name}' の入居数がが更新されました", ephemeral=True)
+
+@bot.slash_command(name='deletehouse', description='VIPハウスを削除')
+@commands.check(is_admin)
+async def deletehouse(ctx, name: str):
+    if name not in apartments:
+        await ctx.respond(f"Apartment '{name}' does not exist.", ephemeral=True)
+    else:
+        del apartments[name]
+        save_apartments()
+        await ctx.respond(f"Apartment '{name}' has been deleted.", ephemeral=True)
+
+
+# ping system
+@bot.slash_command(name='server', description='サーバーの状態を確認します')
+async def server(ctx):
+    ip_address = SERVER_IP
+    response_list = ping(ip_address, size=40, count=10)
+
+    if response_list.rtt_avg_ms > 0:
+        status = '```🟢 オンライン```'
+        color = discord.Color.green()
+    else:
+        status = '```🔴 オフライン```'
+        color = discord.Color.red()
+
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    embed = discord.Embed(title='Server Status', color=color)
+    embed.add_field(name='🔌サーバー状態', value=status, inline=False)
+    embed.add_field(name='🕒Time', value=current_time, inline=False)
+    embed.set_thumbnail(url="https://i.imgur.com/sK2BAAO.png")
+    embed.set_footer(text="Powered By NickyBoy", icon_url="https://i.imgur.com/QfmDKS6.png")
+
+    await ctx.respond(embed=embed)
 
 # Load the apartments data when the bot starts
 load_apartments()

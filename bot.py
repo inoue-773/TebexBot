@@ -264,7 +264,7 @@ async def vipapartment(ctx):
 
 @bot.slash_command(name='updateresidents', description='VIPハウスの人数を更新')
 @commands.check(is_admin)
-async def updateresidents(ctx, name: discord.Option(str, "VIPハウスの名前"), updated_residents: (int, "現在の入居数+キャンセル待ちの数")):
+async def updateresidents(ctx, name: discord.Option(str, "VIPハウスの名前"), updated_residents: discord.Option(int, "現在の入居数+キャンセル待ちの数")):
     if name not in apartments:
         await ctx.respond(f"Apartment '{name}' does not exist.")
     else:

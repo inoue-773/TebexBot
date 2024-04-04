@@ -179,20 +179,21 @@ async def recentpayments(ctx):
 
     if response.status_code == 200:
         data = response.json()
-        payments = data['data']
+        payments = data['data'][:25]  # Truncate the list to the first 25 payments
 
         embed = discord.Embed(title='Recent Payments', color=discord.Color.blue())
 
-        for payment in payments:
-            transaction_id = payment.get('txn_id', 'N/A')  # Use 'N/A' as default if 'txn_id' is not found
-            timestamp = payment.get('time', 0)  # Use 0 as default if 'time' is not found
-            amount = payment.get('price', 'N/A')  # Use 'N/A' as default if 'price' is not found
-            currency = payment.get('currency', 'N/A')  # Use 'N/A' as default if 'currency' is not found
+        payment_info = ""
+        for index, payment in enumerate(payments, start=1):
+            transaction_id = payment.get('id', 'N/A')  # Use 'N/A' as default if 'id' is not found
+            timestamp = payment.get('date', 0)  # Use 0 as default if 'date' is not found
+            amount = payment.get('amount', 'N/A')  # Use 'N/A' as default if 'amount' is not found
+            currency = payment.get('currency', {}).get('iso_4217', 'N/A')  # Use 'N/A' as default if 'currency' or 'iso_4217' is not found
             status = payment.get('status', 'N/A')  # Use 'N/A' as default if 'status' is not found
             player_name = payment.get('player', {}).get('name', 'N/A')  # Use 'N/A' as default if 'player' or 'name' is not found
 
-            # Convert the Unix timestamp to a datetime object
-            dt = datetime.fromtimestamp(timestamp)
+            # Convert the timestamp to a datetime object
+            dt = datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S%z")
 
             # Add 9 hours to convert from UTC to JST
             jst_dt = dt + timedelta(hours=9)
@@ -202,8 +203,11 @@ async def recentpayments(ctx):
 
             package_names = ', '.join([package.get('name', 'N/A') for package in payment.get('packages', [])])  # Use 'N/A' as default if 'packages' or 'name' is not found
 
-            payment_info = f"Player: {player_name}\nAmount: {amount} {currency}\nPackage(s): {package_names}\nStatus: {status}\nDate (JST): {jst_time}"
-            embed.add_field(name=f"Transaction ID: {transaction_id}", value=payment_info, inline=False)
+            payment_info += f"**Transaction ID: {transaction_id}**\nPlayer: {player_name}\nAmount: {amount} {currency}\nPackage(s): {package_names}\nStatus: {status}\nDate (JST): {jst_time}\n\n"
+
+            if index % 5 == 0 or index == len(payments):
+                embed.add_field(name=f"Payments {index-4} to {index}", value=payment_info, inline=False)
+                payment_info = ""
 
         embed.set_footer(text="Powered By NickyBoy", icon_url="https://i.imgur.com/QfmDKS6.png")
         await ctx.respond(embed=embed)

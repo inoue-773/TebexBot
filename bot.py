@@ -1,4 +1,4 @@
-ER_import discord
+import discord
 import os
 import requests
 import json

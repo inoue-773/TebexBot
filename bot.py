@@ -280,7 +280,7 @@ async def vipapartment(ctx):
             embed.set_footer(text="Powered By NickyBoy", icon_url="https://i.imgur.com/QfmDKS6.png")
         await ctx.respond(embed=embed, ephemeral=True)
 
-@bot.slash_command(name='updateresidents', description='VIPハウスの人数を更新')
+@bot.slash_command(name='updateresidents', description='VIPハウスの入居数を更新')
 @commands.check(is_admin)
 async def updateresidents(ctx, name: discord.Option(str, "VIPハウスの名前"), updated_residents: discord.Option(int, "現在の入居数+キャンセル待ちの数")):
     if name not in apartments:
@@ -303,7 +303,7 @@ async def updateresidents(ctx, name: discord.Option(str, "VIPハウスの名前"
         save_apartments()
         await ctx.respond(f" '{name}' の入居数がが更新されました", ephemeral=True)
 
-@bot.slash_command(name='deletehouse', description='VIPハウスを削除')
+@bot.slash_command(name='deletehouse', description='VIPハウスを削除 管理者のみ')
 @commands.check(is_admin)
 async def deletehouse(ctx, name: str):
     if name not in apartments:
@@ -315,12 +315,12 @@ async def deletehouse(ctx, name: str):
 
 
 # ping system
-@bot.slash_command(name='flecity', description='Check server status')
+@bot.slash_command(name='flecity', description='Flecityのサーバー状態を確認')
 async def flecity(ctx):
     await ctx.defer()
 
     try:
-        response = ping('http://162.222.17.5/', unit='ms')
+        response = ping('SERVER_IP', unit='ms')
         jst_time = datetime.utcnow() + timedelta(hours=9)
         formatted_time = jst_time.strftime('%Y-%m-%d %H:%M:%S')
 
@@ -328,16 +328,18 @@ async def flecity(ctx):
         logging.info(f"Response time: {response} ms")
 
         if response is None:
-            status = '🔴 Offline'
+            status = '🔴 オフライン'
         else:
             if response < 1000:
-                status = '🟢 Online'
+                status = '🟢 オンライン'
             else:
-                status = '🔴 Offline'
+                status = '🔴 オフライン'
 
-        embed = discord.Embed(title='Server Status', color=discord.Color.green())
-        embed.add_field(name='Status', value=status, inline=False)
-        embed.add_field(name='Executed At (JST)', value=formatted_time, inline=False)
+        embed = discord.Embed(title='Flecity サーバー状態', color=discord.Color.green())
+        embed.add_field(name='💻ステータス', value=status, inline=False)
+        embed.add_field(name='⏲️時刻', value=formatted_time, inline=False)
+        embed.set_thumbnail(url="https://i.imgur.com/sK2BAAO.png")
+        embed.set_footer(text="Powered By NickyBoy", icon_url="https://i.imgur.com/QfmDKS6.png")
 
         await ctx.followup.send(embed=embed)
     except Exception as e:

@@ -6,6 +6,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 import aiohttp
+import asyncio
 
 load_dotenv()
 
@@ -320,16 +321,17 @@ async def flecity(ctx):
 
     async with aiohttp.ClientSession() as session:
         try:
-            async with session.get(server_url, timeout=5) as response:
-                if response.status == 200:
-                    status = '🟢 Online'
-                    color = discord.Color.green()
-                else:
-                    status = '🔴 Offline'
-                    color = discord.Color.red()
+            async with session.get(server_url) as response:
+                status_code = response.status
         except aiohttp.ClientError:
-            status = '🔴 Offline'
-            color = discord.Color.red()
+            status_code = None
+
+    if status_code == 200:
+        status = '🟢 Online'
+        color = discord.Color.green()
+    else:
+        status = '🔴 Offline'
+        color = discord.Color.red()
 
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -337,8 +339,12 @@ async def flecity(ctx):
     embed.add_field(name='Status', value=status, inline=False)
     embed.add_field(name='Time', value=current_time, inline=False)
 
-    await ctx.respond(embed=embed)
-
+    try:
+        await asyncio.wait_for(ctx.respond(embed=embed), timeout=5.0)
+    except asyncio.TimeoutError:
+        await ctx.respond("The command timed out. Please try again later.")
+    except Exception as e:
+        await ctx.respond(f"An error occurred: {str(e)}")
 
 # Load the apartments data when the bot starts
 load_apartments()

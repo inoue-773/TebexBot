@@ -4,7 +4,6 @@ import requests
 import json
 from discord.ext import commands
 from dotenv import load_dotenv
-import socket
 from datetime import datetime, timedelta
 
 load_dotenv()
@@ -316,33 +315,23 @@ async def deletehouse(ctx, name: str):
 # ping system
 @bot.slash_command(name='flecity', description='Check the status of the server')
 async def flecity(ctx):
-    await ctx.defer()  
+    await ctx.defer()  # Defer the response
 
-    ip_address = SERVER_IP
-    port = 30110
+    server_url = 'http://162.222.17.5'  # Replace with your server's URL
 
     try:
-        # Create a socket object
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(5)  # Set a timeout of 5 seconds
-
-        # Connect to the server
-        result = sock.connect_ex((ip_address, port))
-
-        if result == 0:
+        response = requests.get(server_url, timeout=5)
+        
+        if response.status_code == 200:
             status = '🟢 Online'
             color = discord.Color.green()
         else:
             status = '🔴 Offline'
             color = discord.Color.red()
 
-    except socket.error:
+    except requests.exceptions.RequestException:
         status = '🔴 Offline'
         color = discord.Color.red()
-
-    finally:
-        # Close the socket
-        sock.close()
 
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -351,7 +340,7 @@ async def flecity(ctx):
     embed.add_field(name='Time', value=current_time, inline=False)
 
     try:
-        await ctx.followup.send(embed=embed)  
+        await ctx.followup.send(embed=embed)  # Send the embed as a followup message
     except Exception as e:
         print(f"Error sending response: {str(e)}")
         await ctx.followup.send("An error occurred while sending the response. Please try again later.")

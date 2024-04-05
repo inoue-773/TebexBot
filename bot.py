@@ -354,7 +354,7 @@ async def flecity(ctx):
 @bot.slash_command(name='vdev', description='VehicleDevに権限付与')
 @commands.check(is_admin)
 async def vdev(ctx):
-    vdev_role_id = 1143865932788289596
+    vdev_role_id = 1225931706402607188
     vdev_role = ctx.guild.get_role(vdev_role_id)
     
     if vdev_role is None:

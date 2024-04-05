@@ -322,10 +322,13 @@ async def flecity(ctx):
     jst_time = datetime.utcnow() + timedelta(hours=9)
     formatted_time = jst_time.strftime('%Y-%m-%d %H:%M:%S')
 
-    if response is not None or response < 1000:
-        status = '🟢 Online'
-    else:
+    if response is None:
         status = '🔴 Offline'
+    else:
+        if response < 1000:
+            status = '🟢 Online'
+        else:
+            status = '🔴 Offline'
 
     embed = discord.Embed(title='Server Status', color=discord.Color.green())
     embed.add_field(name='Status', value=status, inline=False)

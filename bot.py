@@ -350,6 +350,28 @@ async def flecity(ctx):
         embed.add_field(name='Status', value=status, inline=False)
         await ctx.followup.send(embed=embed)
 
+# give permission to vehicle dev
+@bot.slash_command(name='vdev', description='VehicleDevに権限付与')
+@commands.check(is_admin)
+async def vdev(ctx):
+    vdev_role_id = 1143865932788289596
+    vdev_role = ctx.guild.get_role(vdev_role_id)
+    
+    if vdev_role is None:
+        await ctx.respond(f"The role with ID {vdev_role_id} does not exist.")
+        return
+    
+    overwrites = {
+        vdev_role: discord.PermissionOverwrite(read_message_history=True, send_messages=True, attach_files=True)
+    }
+    await ctx.channel.edit(overwrites=overwrites)
+    
+    embed = discord.Embed(title="権限を付与しました", color=0x328da8, description="担当者をVehicle Devに変更します。")
+    embed.set_footer(text="Powered By NickyBoy", icon_url="https://i.imgur.com/QfmDKS6.png")
+    await ctx.respond(embed=embed)
+    
+    await ctx.send(f"{vdev_role.mention}")
+
 
 # Load the apartments data when the bot starts
 load_apartments()

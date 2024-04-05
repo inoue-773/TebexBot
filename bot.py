@@ -6,6 +6,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from ping3 import ping
+import logging
 
 load_dotenv()
 

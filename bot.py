@@ -314,8 +314,10 @@ async def deletehouse(ctx, name: str):
 
 
 # ping system
-@bot.slash_command(name='flecity', description='Check the status of the server')
-async def flecity(ctx):
+@bot.slash_command(name='server', description='Check the status of the server')
+async def server(ctx):
+    await ctx.defer()  
+
     ip_address = '162.222.17.5'
     port = 80  # Specify the port number you want to check (e.g., 80 for HTTP)
 
@@ -349,10 +351,10 @@ async def flecity(ctx):
     embed.add_field(name='Time', value=current_time, inline=False)
 
     try:
-        await ctx.respond(embed=embed)
+        await ctx.followup.send(embed=embed)  
     except Exception as e:
         print(f"Error sending response: {str(e)}")
-        await ctx.respond("An error occurred while sending the response. Please try again later.")
+        await ctx.followup.send("An error occurred while sending the response. Please try again later.")
 
 
 # Load the apartments data when the bot starts

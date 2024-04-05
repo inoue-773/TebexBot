@@ -1,4 +1,4 @@
-import discord
+ER_import discord
 import os
 import requests
 import json
@@ -314,12 +314,12 @@ async def deletehouse(ctx, name: str):
 
 
 # ping system
-@bot.slash_command(name='server', description='Check the status of the server')
-async def server(ctx):
+@bot.slash_command(name='flecity', description='Check the status of the server')
+async def flecity(ctx):
     await ctx.defer()  
 
-    ip_address = '162.222.17.5'
-    port = 80  # Specify the port number you want to check (e.g., 80 for HTTP)
+    ip_address = SERVER_IP
+    port = 30110
 
     try:
         # Create a socket object

@@ -318,11 +318,11 @@ async def deletehouse(ctx, name: str):
 async def flecity(ctx):
     await ctx.defer()
 
-    response = ping("162.222.17.5")
+    response = ping(SERVER_IP, unit='ms')
     jst_time = datetime.utcnow() + timedelta(hours=9)
     formatted_time = jst_time.strftime('%Y-%m-%d %H:%M:%S')
 
-    if response is None:
+    if response < 1000:
         status = '🔴 Offline'
     else:
         status = '🟢 Online'
@@ -330,6 +330,7 @@ async def flecity(ctx):
     embed = discord.Embed(title='Server Status', color=discord.Color.green())
     embed.add_field(name='Status', value=status, inline=False)
     embed.add_field(name='Executed At (JST)', value=formatted_time, inline=False)
+    print(response)
 
     await ctx.followup.send(embed=embed)
 

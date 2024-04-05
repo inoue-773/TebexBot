@@ -323,7 +323,7 @@ async def flecity(ctx):
     jst_time = datetime.utcnow() + timedelta(hours=9)
     formatted_time = jst_time.strftime('%Y-%m-%d %H:%M:%S')
 
-    if response is not None:
+    if response:
         status = '🟢 Online'
     else:
         status = '🔴 Offline'

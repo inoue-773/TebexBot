@@ -110,15 +110,13 @@ async def products(ctx):
             package_id = package['id']
             package_info = f"Price: {package_price}, ID: {package_id}, Category: {package_category}"
             current_embed.add_field(name=package_name, value=package_info, inline=False)
-            current_embed.add_field(name=r'\u200b', value=r'\u200b', inline=False)
-            current_embed.set_footer(text="Powered By NickyBoy", icon_url="https://i.imgur.com/QfmDKS6.png")
 
         if current_embed:
             embeds.append(current_embed)
 
         if embeds:
             for embed in embeds:
-                await ctx.send(embed=embed)
+                await ctx.respond(embed=embed)
         else:
             await ctx.respond('No products found.')
     else:

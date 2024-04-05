@@ -320,7 +320,7 @@ async def flecity(ctx):
     await ctx.defer()
 
     try:
-        response = ping(SERVER_IP, unit='ms')
+        response = ping('http://162.222.17.5/', unit='ms')
         jst_time = datetime.utcnow() + timedelta(hours=9)
         formatted_time = jst_time.strftime('%Y-%m-%d %H:%M:%S')
 

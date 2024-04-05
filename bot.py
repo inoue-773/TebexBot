@@ -5,15 +5,15 @@ import json
 from discord.ext import commands
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
-import aiohttp
-import asyncio
+from ping3 import ping
+
 
 load_dotenv()
 
 TOKEN = os.getenv('DISCORD_TOKEN')
 TEBEX_SECRET = os.getenv('TEBEX_SECRET')
 ADMIN_ROLE_IDS = [int(role_id) for role_id in os.getenv('ADMIN_ROLE_IDS').split(',')]
-SERVER_IP = os.getenv('LIVE_SERVER_IP')
+SERVER_IP = os.getenv('SERVER_IP')
 
 
 intents = discord.Intents.all()
@@ -315,36 +315,23 @@ async def deletehouse(ctx, name: str):
 
 
 # ping system
-@bot.slash_command(name='flecity', description='Check the status of the server')
+@bot.slash_command(name='flecity', description='Check server status')
 async def flecity(ctx):
-    server_url = 'http://162.222.17.5'  # Replace with your server's URL
+    response = ping(SERVER_IP)
+    jst_time = datetime.utcnow() + timedelta(hours=9)
+    formatted_time = jst_time.strftime('%Y-%m-%d %H:%M:%S')
 
-    async with aiohttp.ClientSession() as session:
-        try:
-            async with session.get(server_url) as response:
-                status_code = response.status
-        except aiohttp.ClientError:
-            status_code = None
-
-    if status_code == 200:
+    if response is not None:
         status = '🟢 Online'
-        color = discord.Color.green()
     else:
         status = '🔴 Offline'
-        color = discord.Color.red()
 
-    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    embed = discord.Embed(title='Server Status', color=color)
+    embed = discord.Embed(title='Server Status', color=discord.Color.green())
     embed.add_field(name='Status', value=status, inline=False)
-    embed.add_field(name='Time', value=current_time, inline=False)
+    embed.add_field(name='Executed At (JST)', value=formatted_time, inline=False)
 
-    try:
-        await asyncio.wait_for(ctx.respond(embed=embed), timeout=5.0)
-    except asyncio.TimeoutError:
-        await ctx.respond("The command timed out. Please try again later.")
-    except Exception as e:
-        await ctx.respond(f"An error occurred: {str(e)}")
+    await ctx.respond(embed=embed)
+
 
 # Load the apartments data when the bot starts
 load_apartments()

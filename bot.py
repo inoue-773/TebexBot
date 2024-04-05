@@ -5,8 +5,7 @@ import json
 from discord.ext import commands
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
-from ping3 import ping, verbose_ping
-
+from ping3 import ping
 
 load_dotenv()
 
@@ -319,7 +318,7 @@ async def deletehouse(ctx, name: str):
 async def flecity(ctx):
     await ctx.defer()
 
-    response = ping(SERVER_IP)
+    response = ping("162.222.17.5")
     jst_time = datetime.utcnow() + timedelta(hours=9)
     formatted_time = jst_time.strftime('%Y-%m-%d %H:%M:%S')
 

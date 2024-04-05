@@ -318,24 +318,34 @@ async def deletehouse(ctx, name: str):
 async def flecity(ctx):
     await ctx.defer()
 
-    response = ping(SERVER_IP, unit='ms')
-    jst_time = datetime.utcnow() + timedelta(hours=9)
-    formatted_time = jst_time.strftime('%Y-%m-%d %H:%M:%S')
+    try:
+        response = ping(SERVER_IP, unit='ms')
+        jst_time = datetime.utcnow() + timedelta(hours=9)
+        formatted_time = jst_time.strftime('%Y-%m-%d %H:%M:%S')
 
-    if response is None:
-        status = '🔴 Offline'
-    else:
-        if response < 1000:
-            status = '🟢 Online'
-        else:
+        # Log the response
+        logging.info(f"Response time: {response} ms")
+
+        if response is None:
             status = '🔴 Offline'
+        else:
+            if response < 1000:
+                status = '🟢 Online'
+            else:
+                status = '🔴 Offline'
 
-    embed = discord.Embed(title='Server Status', color=discord.Color.green())
-    embed.add_field(name='Status', value=status, inline=False)
-    embed.add_field(name='Executed At (JST)', value=formatted_time, inline=False)
+        embed = discord.Embed(title='Server Status', color=discord.Color.green())
+        embed.add_field(name='Status', value=status, inline=False)
+        embed.add_field(name='Executed At (JST)', value=formatted_time, inline=False)
 
-    print(response)
-    await ctx.followup.send(embed=embed)
+        await ctx.followup.send(embed=embed)
+    except Exception as e:
+        print(f"Error occurred while pinging the server: {str(e)}")
+        logging.error(f"Error occurred while pinging the server: {str(e)}")
+        status = '🔴 Offline'
+        embed = discord.Embed(title='Server Status', color=discord.Color.red())
+        embed.add_field(name='Status', value=status, inline=False)
+        await ctx.followup.send(embed=embed)
 
 
 # Load the apartments data when the bot starts

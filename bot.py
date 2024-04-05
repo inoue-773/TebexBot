@@ -317,7 +317,7 @@ async def deletehouse(ctx, name: str):
 # ping system
 @bot.slash_command(name='flecity', description='Check server status')
 async def flecity(ctx):
-    await cfx.differ()
+    await ctx.differ()
 
     response = ping(SERVER_IP)
     jst_time = datetime.utcnow() + timedelta(hours=9)

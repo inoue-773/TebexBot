@@ -319,17 +319,12 @@ async def flecity(ctx):
 
     server_url = 'http://162.222.17.5'  # Replace with your server's URL
 
-    try:
-        response = requests.get(server_url, timeout=5)
-        
-        if response.status_code == 200:
-            status = '🟢 Online'
-            color = discord.Color.green()
-        else:
-            status = '🔴 Offline'
-            color = discord.Color.red()
-
-    except requests.exceptions.RequestException:
+    response = requests.get(server_url, timeout=5)
+    
+    if response.status_code == 200:
+        status = '🟢 Online'
+        color = discord.Color.green()
+    else:
         status = '🔴 Offline'
         color = discord.Color.red()
 
@@ -339,11 +334,7 @@ async def flecity(ctx):
     embed.add_field(name='Status', value=status, inline=False)
     embed.add_field(name='Time', value=current_time, inline=False)
 
-    try:
-        await ctx.followup.send(embed=embed)  # Send the embed as a followup message
-    except Exception as e:
-        print(f"Error sending response: {str(e)}")
-        await ctx.followup.send("An error occurred while sending the response. Please try again later.")
+    await ctx.followup.send(embed=embed)  # Send the embed as a followup message
 
 
 # Load the apartments data when the bot starts

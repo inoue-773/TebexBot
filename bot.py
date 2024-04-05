@@ -5,6 +5,7 @@ import json
 from discord.ext import commands
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
+import aiohttp
 
 load_dotenv()
 
@@ -315,18 +316,20 @@ async def deletehouse(ctx, name: str):
 # ping system
 @bot.slash_command(name='flecity', description='Check the status of the server')
 async def flecity(ctx):
-    await ctx.defer()  # Defer the response
-
     server_url = 'http://162.222.17.5'  # Replace with your server's URL
 
-    response = requests.get(server_url, timeout=5)
-    
-    if response.status_code == 200:
-        status = '🟢 Online'
-        color = discord.Color.green()
-    else:
-        status = '🔴 Offline'
-        color = discord.Color.red()
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.get(server_url, timeout=5) as response:
+                if response.status == 200:
+                    status = '🟢 Online'
+                    color = discord.Color.green()
+                else:
+                    status = '🔴 Offline'
+                    color = discord.Color.red()
+        except aiohttp.ClientError:
+            status = '🔴 Offline'
+            color = discord.Color.red()
 
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -334,7 +337,7 @@ async def flecity(ctx):
     embed.add_field(name='Status', value=status, inline=False)
     embed.add_field(name='Time', value=current_time, inline=False)
 
-    await ctx.followup.send(embed=embed)  # Send the embed as a followup message
+    await ctx.respond(embed=embed)
 
 
 # Load the apartments data when the bot starts

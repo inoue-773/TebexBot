@@ -5,7 +5,7 @@ import json
 from discord.ext import commands
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
-from ping3 import ping
+from ping3 import ping, verbose_ping
 
 
 load_dotenv()

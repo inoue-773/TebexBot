@@ -317,6 +317,8 @@ async def deletehouse(ctx, name: str):
 # ping system
 @bot.slash_command(name='flecity', description='Check server status')
 async def flecity(ctx):
+    await cfx.differ()
+
     response = ping(SERVER_IP)
     jst_time = datetime.utcnow() + timedelta(hours=9)
     formatted_time = jst_time.strftime('%Y-%m-%d %H:%M:%S')
@@ -330,7 +332,7 @@ async def flecity(ctx):
     embed.add_field(name='Status', value=status, inline=False)
     embed.add_field(name='Executed At (JST)', value=formatted_time, inline=False)
 
-    await ctx.respond(embed=embed)
+    await ctx.followup.send(embed=embed)
 
 
 # Load the apartments data when the bot starts

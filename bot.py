@@ -132,12 +132,12 @@ async def search(ctx, tebex_id: discord.Option(str, "Tebex IDをここに入力 
 
     if response.status_code == 200:
         data = response.json()
-        embed = discord.Embed(title=f'Player Information for {tebex_id}')
-        embed.add_field(name='Username', value=data['player']['username'])
-        embed.add_field(name='Ban Count', value=data['banCount'])
-        embed.add_field(name='Chargeback Rate', value=data['chargebackRate'])
+        embed = discord.Embed(title=f'🔍Player Information for {tebex_id}')
+        embed.add_field(name='👤Username', value=data['player']['username'])
+        embed.add_field(name='🔨Ban Count', value=data['banCount'])
+        embed.add_field(name='💳Chargeback Rate', value=data['chargebackRate'])
         total_purchases = '\n'.join([f"{currency}: {amount}" for currency, amount in data['purchaseTotals'].items()])
-        embed.add_field(name='Total Purchases', value=total_purchases)
+        embed.add_field(name='💵Total Purchases', value=total_purchases)
 
         # Recent payment histories
         payments = data['payments'][:5]  # Limit to the 5 most recent payments
@@ -273,9 +273,9 @@ async def createhouse(ctx, name: discord.Option(str, "VIPハウスの名前"), m
         save_apartments()
         await ctx.respond(f"Apartment '{name}' created successfully.", ephemeral=True)
 
-@bot.slash_command(name='addresidents', description='Add new residents to an apartment')
+@bot.slash_command(name='addresidents', description='入居者数を更新 管理者のみ')
 @commands.check(is_admin)
-async def addresidents(ctx, name: str, num_residents: int):
+async def addresidents(ctx, name: discord.Option(str, "VIPハウスの名前"), num_residents: discord.Option(int, "現在の入居者+キャンセル待ちの数")):
     if name not in apartments:
         await ctx.respond(f"Apartment '{name}' は存在しません", ephemeral=True)
     else:
@@ -294,20 +294,20 @@ async def addresidents(ctx, name: str, num_residents: int):
 @bot.slash_command(name='vipapartment', description='VIPハウスの入居状況を表示')
 async def vipapartment(ctx):
     if not apartments:
-        await ctx.respond("VIPハウスが登録されていません")
+        await ctx.respond("VIPハウスが登録されていません", ephemeral=True)
     else:
         embed = discord.Embed(title='VIP Apartments', description='現在のVIPハウスの状況 超高級VIPはチケットにて随時受付中', color=discord.Color.yellow())
         for name, apartment in apartments.items():
             embed.add_field(
                 name=f"🏠 {name}",
-                value=f"最大入居可能人数: {apartment['max_residents']}\n現在の入居数: {apartment['current_residents']}\nキャンセル待ち: {apartment['waiting_list']}",
+                value=f"👤最大入居可能人数: {apartment['max_residents']}\n👥現在の入居数: {apartment['current_residents']}\n⛔キャンセル待ち: {apartment['waiting_list']}",
                 inline=False
             )
             embed.set_thumbnail(url="https://i.imgur.com/sK2BAAO.png")
             embed.set_footer(text="Powered By NickyBoy", icon_url="https://i.imgur.com/QfmDKS6.png")
         await ctx.respond(embed=embed, ephemeral=True)
 
-@bot.slash_command(name='updateresidents', description='VIPハウスの入居数を更新')
+@bot.slash_command(name='updateresidents', description='VIPハウスの入居数を更新 管理者のみ')
 @commands.check(is_admin)
 async def updateresidents(ctx, name: discord.Option(str, "VIPハウスの名前"), updated_residents: discord.Option(int, "現在の入居数+キャンセル待ちの数")):
     if name not in apartments:

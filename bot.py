@@ -348,7 +348,7 @@ async def flecity(ctx):
         status = '🔴 Offline'
         embed = discord.Embed(title='Server Status', color=discord.Color.red())
         embed.add_field(name='Status', value=status, inline=False)
-        await ctx.followup.send(embed=embed)
+        await ctx.followup.send(embed=embed, ephemeral=True)
 
 # give permission to vehicle dev
 @bot.slash_command(name='vdev', description='VehicleDevに権限付与')

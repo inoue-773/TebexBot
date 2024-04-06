@@ -138,6 +138,33 @@ async def search(ctx, tebex_id: discord.Option(str, "Tebex IDをここに入力 
         embed.add_field(name='Chargeback Rate', value=data['chargebackRate'])
         total_purchases = '\n'.join([f"{currency}: {amount}" for currency, amount in data['purchaseTotals'].items()])
         embed.add_field(name='Total Purchases', value=total_purchases)
+
+        # Recent payment histories
+        payments = data['payments'][:5]  # Limit to the 5 most recent payments
+        payment_info = ""
+        for payment in payments:
+            txn_id = payment.get('txn_id', 'N/A')
+            timestamp = payment.get('time', 0)
+            price = payment.get('price', 'N/A')
+            currency = payment.get('currency', 'N/A')
+            status = payment.get('status', 'N/A')
+
+            # Convert the Unix timestamp to a datetime object
+            dt = datetime.fromtimestamp(timestamp)
+
+            # Add 9 hours to convert from UTC to JST
+            jst_dt = dt + timedelta(hours=9)
+
+            # Format the datetime as a string in JST
+            jst_time = jst_dt.strftime("%Y-%m-%d %H:%M:%S")
+
+            payment_info += f"Transaction ID: {txn_id}\nPrice: {price} {currency}\nStatus: {status}\nDate (JST): {jst_time}\n\n"
+
+        if payment_info:
+            embed.add_field(name='Recent Payments', value=payment_info, inline=False)
+        else:
+            embed.add_field(name='Recent Payments', value='No recent payments found', inline=False)
+
         embed.set_footer(text="Powered By NickyBoy", icon_url="https://i.imgur.com/QfmDKS6.png")
         await ctx.respond(embed=embed)
     else:

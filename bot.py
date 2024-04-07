@@ -346,11 +346,11 @@ async def deletehouse(ctx, name: str):
 async def flecity(ctx):
     await ctx.defer()
 
+    jst_time = datetime.utcnow() + timedelta(hours=9)
+    formatted_time = jst_time.strftime('%Y-%m-%d %H:%M:%S')
+
     try:
-        url = 'http://162.222.17.5/'
-        response = requests.get(url)
-        jst_time = datetime.utcnow() + timedelta(hours=9)
-        formatted_time = jst_time.strftime('%Y-%m-%d %H:%M:%S')
+        response = requests.get(f'http://{SERVER_IP}', timeout=10)
 
         if response.status_code == 200:
             status = '🟢 オンライン'
@@ -360,6 +360,9 @@ async def flecity(ctx):
         # Log the response status code
         logging.info(f"Response status code: {response.status_code}")
 
+    except requests.exceptions.ConnectTimeout:
+        status = '🔴 オフライン'
+        logging.error(f"Connection timed out while making the request to {SERVER_IP}")
     except requests.exceptions.RequestException as e:
         status = '🔴 オフライン'
         logging.error(f"Error occurred while making the request: {str(e)}")
@@ -371,7 +374,6 @@ async def flecity(ctx):
     embed.set_footer(text="Powered By NickyBoy", icon_url="https://i.imgur.com/QfmDKS6.png")
 
     await ctx.followup.send(embed=embed, ephemeral=True)
-
 
 # give permission to vehicle dev
 @bot.slash_command(name='vdev', description='VehicleDevに権限付与')

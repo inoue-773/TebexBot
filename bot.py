@@ -347,7 +347,8 @@ async def flecity(ctx):
     await ctx.defer()
 
     try:
-        response = requests.get(f'http://{SERVER_IP}')
+        url = http://162.222.17.5/
+        response = requests.get(url)
         jst_time = datetime.utcnow() + timedelta(hours=9)
         formatted_time = jst_time.strftime('%Y-%m-%d %H:%M:%S')
 

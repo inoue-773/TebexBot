@@ -346,28 +346,28 @@ async def deletehouse(ctx, name: str):
 async def flecity(ctx):
     await ctx.defer()
 
-        response = ping('SERVER_IP', unit='ms')
-        jst_time = datetime.utcnow() + timedelta(hours=9)
-        formatted_time = jst_time.strftime('%Y-%m-%d %H:%M:%S')
+    response = ping('SERVER_IP', unit='ms')
+    jst_time = datetime.utcnow() + timedelta(hours=9)
+    formatted_time = jst_time.strftime('%Y-%m-%d %H:%M:%S')
 
-        # Log the response
-        logging.info(f"Response time: {response} ms")
+    # Log the response
+    logging.info(f"Response time: {response} ms")
 
-        if response is None:
-            status = '🔴 オフライン'
+    if response is None:
+        status = '🔴 オフライン'
+    else:
+        if response < 1000:
+            status = '🟢 オンライン'
         else:
-            if response < 1000:
-                status = '🟢 オンライン'
-            else:
-                status = '🔴 オフライン'
+            status = '🔴 オフライン'
 
-        embed = discord.Embed(title='Flecity サーバー状態', color=discord.Color.green())
-        embed.add_field(name='💻ステータス', value=status, inline=False)
-        embed.add_field(name='⏲️時刻', value=formatted_time, inline=False)
-        embed.set_thumbnail(url="https://i.imgur.com/sK2BAAO.png")
-        embed.set_footer(text="Powered By NickyBoy", icon_url="https://i.imgur.com/QfmDKS6.png")
+    embed = discord.Embed(title='Flecity サーバー状態', color=discord.Color.green())
+    embed.add_field(name='💻ステータス', value=status, inline=False)
+    embed.add_field(name='⏲️時刻', value=formatted_time, inline=False)
+    embed.set_thumbnail(url="https://i.imgur.com/sK2BAAO.png")
+    embed.set_footer(text="Powered By NickyBoy", icon_url="https://i.imgur.com/QfmDKS6.png")
 
-        await ctx.followup.send(embed=embed, ephemeral=True)
+    await ctx.followup.send(embed=embed, ephemeral=True)
 
 
 

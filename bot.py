@@ -346,7 +346,6 @@ async def deletehouse(ctx, name: str):
 async def flecity(ctx):
     await ctx.defer()
 
-    try:
         response = ping('SERVER_IP', unit='ms')
         jst_time = datetime.utcnow() + timedelta(hours=9)
         formatted_time = jst_time.strftime('%Y-%m-%d %H:%M:%S')
@@ -368,15 +367,9 @@ async def flecity(ctx):
         embed.set_thumbnail(url="https://i.imgur.com/sK2BAAO.png")
         embed.set_footer(text="Powered By NickyBoy", icon_url="https://i.imgur.com/QfmDKS6.png")
 
-        await ctx.send(embed=embed, ephemeral=True)
-
-    except Exception as e:
-        print(f"Error occurred while pinging the server: {str(e)}")
-        logging.error(f"Error occurred while pinging the server: {str(e)}")
-        status = '🔴 Offline'
-        embed = discord.Embed(title='Server Status', color=discord.Color.red())
-        embed.add_field(name='Status', value=status, inline=False)
         await ctx.followup.send(embed=embed, ephemeral=True)
+
+
 
 # give permission to vehicle dev
 @bot.slash_command(name='vdev', description='VehicleDevに権限付与')

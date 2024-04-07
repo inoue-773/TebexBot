@@ -3,6 +3,7 @@ import os
 import requests
 from discord.ext import commands
 from dotenv import load_dotenv
+from datetime import datetime, timedelta
 
 
 load_dotenv()
@@ -29,7 +30,7 @@ async def kakunin(ctx, transaction_id: discord.Option(str, "tbxから始まるTr
         # Convert the date to JST
         date_str = data['date']
         date_utc = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S%z")
-        date_jst = date_utc + timedelta(hours=9)
+        date_jst = date_utc + timedelta(hours=-4)
         date_jst_str = date_jst.strftime("%Y-%m-%d %H:%M:%S")
 
         embed = discord.Embed(
@@ -130,7 +131,7 @@ async def search(ctx, tebex_id: discord.Option(str, "Tebex IDをここに入力 
             dt = datetime.fromtimestamp(timestamp)
 
             # Add 9 hours to convert from UTC to JST
-            jst_dt = dt + timedelta(hours=9)
+            jst_dt = dt + timedelta(hours=-4)
 
             # Format the datetime as a string in JST
             jst_time = jst_dt.strftime("%Y-%m-%d %H:%M:%S")
@@ -214,7 +215,7 @@ async def recentpayments(ctx):
             dt = datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S%z")
 
             # Add 9 hours to convert from UTC to JST
-            jst_dt = dt + timedelta(hours=9)
+            jst_dt = dt + timedelta(hours=-4)
 
             # Format the datetime as a string in JST
             jst_time = jst_dt.strftime("%Y-%m-%d %H:%M:%S")

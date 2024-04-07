@@ -368,7 +368,8 @@ async def flecity(ctx):
         embed.set_thumbnail(url="https://i.imgur.com/sK2BAAO.png")
         embed.set_footer(text="Powered By NickyBoy", icon_url="https://i.imgur.com/QfmDKS6.png")
 
-        await ctx.followup.send(embed=embed, ephemeral=True)
+        await ctx.send(embed=embed, ephemeral=True)
+
     except Exception as e:
         print(f"Error occurred while pinging the server: {str(e)}")
         logging.error(f"Error occurred while pinging the server: {str(e)}")
@@ -389,6 +390,7 @@ async def vdev(ctx):
         return
     
     overwrites = {
+        ctx.guild.default_role: discord.PermissionOverwrite(read_message_history=False, send_messages=False, attach_files=False),
         vdev_role: discord.PermissionOverwrite(read_message_history=True, send_messages=True, attach_files=True)
     }
     await ctx.channel.edit(overwrites=overwrites)

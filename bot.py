@@ -388,7 +388,7 @@ async def vdev(ctx):
     
     overwrites = {
         ctx.guild.default_role: discord.PermissionOverwrite(view_channel=False, read_message_history=False, send_messages=False, attach_files=False),
-        vdev_role: discord.PermissionOverwrite(read_message_history=True, send_messages=True, attach_files=True)
+        vdev_role: discord.PermissionOverwrite(view_channel=True, read_message_history=True, send_messages=True, attach_files=True)
     }
     await ctx.channel.edit(overwrites=overwrites)
     

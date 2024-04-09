@@ -390,7 +390,7 @@ async def vdev(ctx):
         ctx.guild.default_role: discord.PermissionOverwrite(read_message_history=False, send_messages=False, attach_files=False),
         vdev_role: discord.PermissionOverwrite(read_message_history=True, send_messages=True, attach_files=True)
     }
-    await ctx.channel.edit('secret', overwrites=overwrites)
+    await ctx.channel.edit(overwrites=overwrites)
     
     embed = discord.Embed(title="権限を付与しました", color=0x328da8, description="担当者をVehicle Devに変更します。")
     embed.set_footer(text="Powered By NickyBoy", icon_url="https://i.imgur.com/QfmDKS6.png")

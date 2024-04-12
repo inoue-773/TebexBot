@@ -381,23 +381,36 @@ async def flecity(ctx):
 async def vdev(ctx):
     vdev_role_id = 1143865932788289596
     vdev_role = ctx.guild.get_role(vdev_role_id)
-    
+
     if vdev_role is None:
         await ctx.respond(f"The role with ID {vdev_role_id} does not exist.")
         return
-    
-    overwrites = {
-        ctx.guild.default_role: discord.PermissionOverwrite(view_channel=False, read_message_history=False, send_messages=False, attach_files=False),
-        vdev_role: discord.PermissionOverwrite(view_channel=True, read_message_history=True, send_messages=True, attach_files=True)
-    }
-    await ctx.channel.edit(overwrites=overwrites)
-    
-    embed = discord.Embed(title="権限を付与しました", color=0x328da8, description="担当者をVehicle Devに変更します。")
-    embed.set_footer(text="Powered By NickyBoy", icon_url="https://i.imgur.com/QfmDKS6.png")
-    await ctx.respond(embed=embed)
-    
-    await ctx.send(f"{vdev_role.mention}")
 
+    # Retrieve the current channel permissions for all roles and members
+    current_overwrites = ctx.channel.overwrites
+
+    # Update the permissions for the vdev role
+    vdev_permissions = discord.PermissionOverwrite(
+        view_channel=True,
+        read_message_history=True,
+        send_messages=True,
+        attach_files=True
+    )
+
+    # Add the vdev role permissions to the current overwrites
+    current_overwrites[vdev_role] = vdev_permissions
+
+    try:
+        # Update the channel permissions
+        await ctx.channel.edit(overwrites=current_overwrites)
+
+        embed = discord.Embed(title="権限を付与しました", color=0x328da8, description="担当者をVehicle Devに変更します。")
+        embed.set_footer(text="Powered By NickyBoy", icon_url="https://i.imgur.com/QfmDKS6.png")
+        await ctx.respond(embed=embed)
+
+        await ctx.send(f"{vdev_role.mention}")
+    except discord.Forbidden:
+        await ctx.respond("I don't have permission to modify channel permissions.")
 
 # Load the apartments data when the bot starts
 load_apartments()

@@ -17,9 +17,9 @@ bot = commands.Bot(command_prefix='/', intents=discord.Intents.all())
 def is_admin(ctx):
     return any(role.id in ADMIN_ROLE_IDS for role in ctx.author.roles)
 
-@bot.slash_command(name='kakunin', description='Transaction IDから情報を取得')
+@bot.slash_command(name='verify', description='Get payment info from Transaction ID')
 @commands.check(is_admin)
-async def kakunin(ctx, transaction_id: discord.Option(str, "tbxから始まるTransaction IDを入力")):
+async def kakunin(ctx, transaction_id: discord.Option(str, "Transaction ID")):
     url = f'https://plugin.tebex.io/payments/{transaction_id}'
     key = {'X-Tebex-Secret': TEBEX_SECRET}
     response = requests.get(url, headers=key)
@@ -65,7 +65,7 @@ async def kakunin(ctx, transaction_id: discord.Option(str, "tbxから始まるTr
     else:
         await ctx.respond('Failed to retrieve payment information.')
 
-@bot.slash_command(name='products', description='寄付できる返礼品の一覧')
+@bot.slash_command(name='products', description='list of produscts on the store')
 @commands.check(is_admin)
 async def products(ctx):
     url = 'https://plugin.tebex.io/packages'
@@ -81,7 +81,7 @@ async def products(ctx):
             if index % 25 == 1:
                 if current_embed:
                     embeds.append(current_embed)
-                current_embed = discord.Embed(title='返礼品一覧', color=0XE16941, description='返礼品の一覧')
+                current_embed = discord.Embed(title='Products', color=0XE16941, description='Here are the list of products on the store')
 
             package_name = package['name']
             package_price = package['price']
@@ -101,14 +101,14 @@ async def products(ctx):
     else:
         await ctx.respond('Failed to retrieve product information.')
 
-@bot.slash_command(name='search', description='Tebex IDから情報を取得')
+@bot.slash_command(name='search', description='Get information from Tebex usename')
 @commands.check(is_admin)
-async def search(ctx, tebex_id: discord.Option(str, "Tebex IDをここに入力 Transaction IDではない")):
+async def search(ctx, tebex_id: discord.Option(str, "Tebex username")):
     url = f'https://plugin.tebex.io/user/{tebex_id}'
     key = {'X-Tebex-Secret': TEBEX_SECRET}
     response = requests.get(url, headers=key)
 
-    if response.status_code == 200:
+     if response.status_code == 200:
         data = response.json()
         embed = discord.Embed(title=f'🔍Player Information for {tebex_id}')
         embed.add_field(name='👤Username', value=data['player']['username'])
@@ -131,7 +131,7 @@ async def search(ctx, tebex_id: discord.Option(str, "Tebex IDをここに入力 
             dt = datetime.fromtimestamp(timestamp)
 
             # Add 9 hours to convert from UTC to JST
-            jst_dt = dt + timedelta(hours=-4)
+            jst_dt = dt + timedelta(hours=9)
 
             # Format the datetime as a string in JST
             jst_time = jst_dt.strftime("%Y-%m-%d %H:%M:%S")
@@ -148,9 +148,9 @@ async def search(ctx, tebex_id: discord.Option(str, "Tebex IDをここに入力 
     else:
         await ctx.respond('Failed to retrieve player information.')
 
-@bot.slash_command(name='updateproduct', description='返礼品の情報を更新')
+@bot.slash_command(name='updateproduct', description='Update product information')
 @commands.check(is_admin)
-async def updateproduct(ctx, package_id: discord.Option(int, "返礼品IDを入力 分からない場合は/productsで確認"), enabled: discord.Option(bool, "disabledの場合寄付の受け付けを中止"), name: discord.Option(str, "新しい返礼品の名前"), price: discord.Option(float, "新しい返礼品の価格")):
+async def updateproduct(ctx, package_id: discord.Option(int, "product ID"), enabled: discord.Option(bool, "enabled / disabled"), name: discord.Option(str, "new product name"), price: discord.Option(float, "new price")):
     url = f'https://plugin.tebex.io/package/{package_id}'
     key = {'X-Tebex-Secret': TEBEX_SECRET}
     data = {
@@ -166,9 +166,9 @@ async def updateproduct(ctx, package_id: discord.Option(int, "返礼品IDを入�
     else:
         await ctx.respond('Failed to update the package.')
 
-@bot.slash_command(name='createurl', description='決済URLを作成')
+@bot.slash_command(name='createurl', description='Create payment URL')
 @commands.check(is_admin)
-async def createurl(ctx, package_id: discord.Option(str, "返礼品IDを入力 分からない場合は/productsで確認"), tebex_id: discord.Option(str, "Tebex IDを入力")):
+async def createurl(ctx, package_id: discord.Option(str, "product ID"), tebex_id: discord.Option(str, "Tebex username")):
     url = 'https://plugin.tebex.io/checkout'
     key = {'X-Tebex-Secret': TEBEX_SECRET}
     data = {
@@ -189,7 +189,7 @@ async def createurl(ctx, package_id: discord.Option(str, "返礼品IDを入力 �
     else:
         await ctx.respond('Failed to create the checkout URL.')
 
-@bot.slash_command(name='recentpayments', description='直近25件の決済の一覧表示')
+@bot.slash_command(name='recentpayments', description='Recent payment information')
 @commands.check(is_admin)
 async def recentpayments(ctx):
     url = 'https://plugin.tebex.io/payments?paged=1'

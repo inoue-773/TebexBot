@@ -27,11 +27,10 @@ async def kakunin(ctx, transaction_id: discord.Option(str, "Transaction ID")):
     if response.status_code == 200:
         data = response.json()
 
-        # Convert the date to JST
+        # Convert the date to UTC
         date_str = data['date']
         date_utc = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S%z")
-        date_jst = date_utc + timedelta(hours=-4)
-        date_jst_str = date_jst.strftime("%Y-%m-%d %H:%M:%S")
+        date_utc_str = date_utc.strftime("%Y-%m-%d %H:%M:%S")
 
         embed = discord.Embed(
             title=f"🔍 Information for {transaction_id}",
@@ -48,7 +47,7 @@ async def kakunin(ctx, transaction_id: discord.Option(str, "Transaction ID")):
             status_text = f"```🔴 {status}```"
         embed.add_field(name="📊 Status", value=status_text, inline=True)
 
-        embed.add_field(name="📅 Date (JST)", value=date_jst_str, inline=False)
+        embed.add_field(name="📅 Date (UTC)", value=date_utc_str, inline=False)
 
         player_name = data['player']['name']
         embed.add_field(name="👤 Tebex Username", value=player_name, inline=False)
@@ -64,6 +63,7 @@ async def kakunin(ctx, transaction_id: discord.Option(str, "Transaction ID")):
         await ctx.respond(embed=embed)
     else:
         await ctx.respond('Failed to retrieve payment information.')
+
 
 @bot.slash_command(name='products', description='list of produscts on the store')
 @commands.check(is_admin)
@@ -101,14 +101,14 @@ async def products(ctx):
     else:
         await ctx.respond('Failed to retrieve product information.')
 
-@bot.slash_command(name='search', description='Get information from Tebex usename')
+@bot.slash_command(name='search', description='Get information from Tebex username')
 @commands.check(is_admin)
 async def search(ctx, tebex_id: discord.Option(str, "Tebex username")):
     url = f'https://plugin.tebex.io/user/{tebex_id}'
     key = {'X-Tebex-Secret': TEBEX_SECRET}
     response = requests.get(url, headers=key)
 
-     if response.status_code == 200:
+    if response.status_code == 200:
         data = response.json()
         embed = discord.Embed(title=f'🔍Player Information for {tebex_id}')
         embed.add_field(name='👤Username', value=data['player']['username'])
@@ -127,16 +127,13 @@ async def search(ctx, tebex_id: discord.Option(str, "Tebex username")):
             currency = payment.get('currency', 'N/A')
             status = payment.get('status', 'N/A')
 
-            # Convert the Unix timestamp to a datetime object
-            dt = datetime.fromtimestamp(timestamp)
+            # Convert the Unix timestamp to a datetime object in UTC
+            dt = datetime.utcfromtimestamp(timestamp)
 
-            # Add 9 hours to convert from UTC to JST
-            jst_dt = dt + timedelta(hours=9)
+            # Format the datetime as a string in UTC
+            utc_time = dt.strftime("%Y-%m-%d %H:%M:%S")
 
-            # Format the datetime as a string in JST
-            jst_time = jst_dt.strftime("%Y-%m-%d %H:%M:%S")
-
-            payment_info += f"Transaction ID: {txn_id}\nPrice: {price} {currency}\nStatus: {status}\nDate (JST): {jst_time}\n\n"
+            payment_info += f"Transaction ID: {txn_id}\nPrice: {price} {currency}\nStatus: {status}\nDate (UTC): {utc_time}\n\n"
 
         if payment_info:
             embed.add_field(name='Recent Payments', value=payment_info, inline=False)
@@ -181,9 +178,14 @@ async def createurl(ctx, package_id: discord.Option(str, "product ID"), tebex_id
         checkout_data = response.json()
         checkout_url = checkout_data['url']
         expires_at = checkout_data['expires']
+
+        # Convert ISO format to readable UTC format
+        expires_at_dt = datetime.strptime(expires_at, "%Y-%m-%dT%H:%M:%SZ")
+        readable_expires_at = expires_at_dt.strftime("%Y-%m-%d %H:%M")
+
         embed = discord.Embed(title='Checkout URL Created', color=discord.Color.green())
         embed.add_field(name='URL', value=checkout_url)
-        embed.add_field(name='Expires At', value=expires_at)
+        embed.add_field(name='Expires At', value=readable_expires_at)
         embed.set_footer(text="Powered By NickyBoy", icon_url="https://i.imgur.com/QfmDKS6.png")
         await ctx.respond(embed=embed)
     else:

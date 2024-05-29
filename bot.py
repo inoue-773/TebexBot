@@ -352,10 +352,10 @@ async def flecity(ctx):
     try:
         response = requests.get(f'http://{SERVER_IP}', timeout=10)
 
-        if response.status_code == 200:
+        if response.ok:
             status = '🟢 オンライン'
         else:
-            status = '🔴 オフライン'
+            status = '🟢 オンライン'  # Consider any response as online
 
         # Log the response status code
         logging.info(f"Response status code: {response.status_code}")
